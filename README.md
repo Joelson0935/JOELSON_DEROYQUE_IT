@@ -44,6 +44,10 @@ Sobe três contêineres: PostgreSQL, um mock do provedor (WireMock, responde `20
 Para testar a API ponta a ponta:
 
 ```bash
+http://localhost:8080/dev/token?scope=activation.read%20activation.write
+```
+
+```bash
 # 1) Obter um token de desenvolvimento (HMAC) com os dois escopos
 TOKEN=$(curl -s "http://localhost:8080/dev/token?scope=activation.read%20activation.write" | sed -E 's/.*"access_token":"([^"]+)".*/\1/')
 
