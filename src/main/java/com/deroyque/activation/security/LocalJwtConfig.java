@@ -12,14 +12,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Decoder/encoder JWT baseado em segredo HMAC (HS256) para desenvolvimento e testes locais,
- * ativado apenas quando {@code security.dev.jwt.hmac-secret} está presente.
- *
- * <p>Em produção esta configuração fica inativa: o {@code issuer-uri}/{@code jwk-set-uri} do
- * {@code application.yml} fazem o Spring validar tokens assinados pelo Authorization Server real
- * (RS256/JWKS). Assim o código de produção não depende de segredo simétrico.
- */
 @Configuration
 @ConditionalOnProperty(name = "security.dev.jwt.hmac-secret")
 public class LocalJwtConfig {

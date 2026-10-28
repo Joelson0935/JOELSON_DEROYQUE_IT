@@ -7,10 +7,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-/**
- * Base para testes de integração que exigem um PostgreSQL real (ex.: {@code FOR UPDATE SKIP
- * LOCKED} do worker e o teste de concorrência de duplicidade, que o H2 não reproduz fielmente).
- */
 @SpringBootTest
 @Testcontainers
 public abstract class AbstractPostgresIT {
@@ -24,7 +20,7 @@ public abstract class AbstractPostgresIT {
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
         registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
-        // Segredo HMAC para a emissão de tokens nos testes.
+        
         registry.add("security.dev.jwt.hmac-secret", () -> "it-only-secret-change-me-please-32bytes!!");
     }
 }

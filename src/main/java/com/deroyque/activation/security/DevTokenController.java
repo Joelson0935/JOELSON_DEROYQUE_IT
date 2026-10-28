@@ -12,17 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Emite tokens JWT de desenvolvimento (HMAC) para testar a API manualmente sem um Authorization
- * Server real. Disponível APENAS no profile {@code local}.
- *
- * <p>Fica ativo apenas quando há um {@link JwtEncoder} no contexto — ou seja, quando o
- * {@code LocalJwtConfig} (HMAC de dev) está presente. Em produção (RS256 via issuer), este bean
- * não existe e o endpoint não é exposto.
- *
- * <p>Exemplo:
- * <pre>GET /dev/token?scope=activation.read activation.write&amp;azp=cliente-a</pre>
- */
 @RestController
 @ConditionalOnBean(JwtEncoder.class)
 public class DevTokenController {

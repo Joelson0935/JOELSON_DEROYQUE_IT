@@ -12,13 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.deroyque.activation.domain.ActivationRequestRepository;
 import com.deroyque.activation.domain.RequestStatus;
 
-/**
- * Transições de estado persistidas em transações curtas e independentes.
- *
- * <p>Fica num bean separado de {@link ActivationProcessor} de propósito: métodos
- * {@code @Transactional} só têm efeito quando invocados através do proxy do Spring. Se
- * estivessem no mesmo bean do orquestrador (self-invocation), as transações seriam ignoradas.
- */
 @Component
 public class ActivationStateUpdater {
 
@@ -33,11 +26,6 @@ public class ActivationStateUpdater {
         this.properties = properties;
     }
 
-    /**
-     * Seleciona um lote de PENDING elegíveis (com {@code FOR UPDATE SKIP LOCKED}) e marca todos
-     * como PROCESSING dentro da mesma transação. O lock + SKIP LOCKED garante que instâncias
-     * concorrentes peguem lotes disjuntos. Retorna os comandos a enviar ao provedor.
-     */
     @Transactional
     public java.util.List<ActivateCommand> claimBatch(int batchSize) {
         var batch = repository.lockPendingBatch(Instant.now(), batchSize);
@@ -52,7 +40,6 @@ public class ActivationStateUpdater {
         return commands;
     }
 
-    /** PENDING -> PROCESSING de um único id. Retorna o comando, ou vazio se inelegível. */
     @Transactional
     public Optional<ActivateCommand> beginProcessing(UUID id) {
         var request = repository.findById(id).orElse(null);
@@ -66,7 +53,6 @@ public class ActivationStateUpdater {
                 request.getCustomerId(), request.getProductCode()));
     }
 
-    /** Aplica o desfecho da chamada ao provedor (COMPLETED / FAILED / reagendar). */
     @Transactional
     public void applyOutcome(UUID id, ProviderOutcome outcome) {
         var request = repository.findById(id).orElse(null);
@@ -98,10 +84,6 @@ public class ActivationStateUpdater {
         repository.save(request);
     }
 
-    /**
-     * Backoff exponencial com teto. {@code Retry-After} do provedor, se presente, tem prioridade.
-     * Fórmula: {@code base * 2^(attempts-1)}, limitado a {@code maxBackoffSeconds}.
-     */
     private Instant nextBackoff(int attempts, Integer retryAfterSeconds) {
         long seconds;
         if (retryAfterSeconds != null && retryAfterSeconds > 0) {

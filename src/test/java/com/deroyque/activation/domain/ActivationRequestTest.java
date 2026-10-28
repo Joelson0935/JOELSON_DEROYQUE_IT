@@ -7,9 +7,6 @@ import java.time.Instant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * Testes unitários da máquina de estados do domínio (sem Spring, sem banco).
- */
 class ActivationRequestTest {
 
     private ActivationRequest newRequest() {
@@ -73,7 +70,7 @@ class ActivationRequestTest {
 
         assertThat(request.getStatus()).isEqualTo(RequestStatus.PENDING);
         assertThat(request.getNextAttemptAt()).isEqualTo(next);
-        assertThat(request.getAttempts()).isEqualTo(1); // attempts não é decrementado
+        assertThat(request.getAttempts()).isEqualTo(1); 
     }
 
     @Test

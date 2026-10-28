@@ -13,13 +13,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.UUID;
 
-/**
- * Garante um identificador de correlação ({@code traceId}) por requisição.
- *
- * <p>Se o cliente enviar {@code X-Trace-Id}, ele é reutilizado; caso contrário, um novo é gerado.
- * O valor é colocado no MDC (aparecendo em todas as linhas de log da requisição, inclusive na
- * chamada ao provedor) e devolvido no header de resposta para o consumidor.
- */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class TraceIdFilter extends OncePerRequestFilter {

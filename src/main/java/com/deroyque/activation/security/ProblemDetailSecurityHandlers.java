@@ -14,10 +14,6 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URI;
 
-/**
- * Faz com que falhas de autenticação (401) e de autorização (403) ocorridas na cadeia de filtros
- * de segurança respondam no mesmo formato Problem Details (RFC 9457) usado pelo resto da API.
- */
 @Component
 public class ProblemDetailSecurityHandlers implements AuthenticationEntryPoint, AccessDeniedHandler {
 

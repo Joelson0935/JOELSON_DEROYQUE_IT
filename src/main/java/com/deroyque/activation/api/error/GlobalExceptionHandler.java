@@ -19,20 +19,12 @@ import com.deroyque.activation.service.RequestNotFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-/**
- * Tratamento centralizado de erros, respondendo no formato Problem Details (RFC 9457) via
- * {@link ProblemDetail}. Nunca expõe stack trace ou detalhes internos ao consumidor.
- *
- * <p>Cada resposta carrega um {@code traceId} (propriedade estendida) para correlacionar com os
- * logs. O {@code traceId} vem do MDC (preenchido por {@code TraceIdFilter}).
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final String PROBLEM_BASE = "https://api.deroyque.com/problems/";
 
-    /** Dados inválidos (Bean Validation). */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
         var problem = base(HttpStatus.BAD_REQUEST, "validation-error", "Dados inválidos",
@@ -44,28 +36,24 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    /** JSON malformado ou corpo ilegível. */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleUnreadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
         return base(HttpStatus.BAD_REQUEST, "malformed-request", "Requisição malformada",
                 "O corpo da requisição não pôde ser lido.", request);
     }
 
-    /** Parâmetro de tipo inválido (ex.: status inexistente no enum). */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
         return base(HttpStatus.BAD_REQUEST, "invalid-parameter", "Parâmetro inválido",
                 "O parâmetro '%s' possui valor inválido.".formatted(ex.getName()), request);
     }
 
-    /** Registro inexistente. */
     @ExceptionHandler(RequestNotFoundException.class)
     public ProblemDetail handleNotFound(RequestNotFoundException ex, HttpServletRequest request) {
         return base(HttpStatus.NOT_FOUND, "not-found", "Recurso não encontrado",
                 "A solicitação informada não existe.", request);
     }
 
-    /** Duplicidade com conteúdo divergente. */
     @ExceptionHandler(DuplicateExternalIdException.class)
     public ProblemDetail handleDuplicate(DuplicateExternalIdException ex, HttpServletRequest request) {
         var problem = base(HttpStatus.CONFLICT, "duplicate-external-id", "Solicitação duplicada",
@@ -74,14 +62,12 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    /** Transição de estado inválida. */
     @ExceptionHandler(InvalidStateTransitionException.class)
     public ProblemDetail handleInvalidTransition(InvalidStateTransitionException ex, HttpServletRequest request) {
         return base(HttpStatus.CONFLICT, "invalid-state-transition", "Transição de estado inválida",
                 "A operação não é permitida para o estado atual da solicitação.", request);
     }
 
-    /** Escopo/autorização insuficiente (lançada por @PreAuthorize). */
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
     public ProblemDetail handleAccessDenied(org.springframework.security.access.AccessDeniedException ex,
                                             HttpServletRequest request) {
@@ -89,10 +75,9 @@ public class GlobalExceptionHandler {
                 "O token não possui o escopo necessário para esta operação.", request);
     }
 
-    /** Fallback para erros inesperados — nunca vaza detalhes internos. */
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnexpected(Exception ex, HttpServletRequest request) {
-        // Detalhe completo só no log (com traceId), não na resposta.
+        
         log.error("Erro inesperado ao processar {}", request.getRequestURI(), ex);
         return base(HttpStatus.INTERNAL_SERVER_ERROR, "internal-error", "Erro interno",
                 "Ocorreu um erro inesperado. Use o traceId para suporte.", request);
@@ -108,7 +93,6 @@ public class GlobalExceptionHandler {
         return problem;
     }
 
-    /** Detalhe de erro de campo exposto em respostas de validação. */
     public record FieldErrorDetail(String field, String message) {
     }
 }

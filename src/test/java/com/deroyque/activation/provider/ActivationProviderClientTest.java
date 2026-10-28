@@ -18,10 +18,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Testes do cliente HTTP do provedor contra um WireMock, cobrindo o mapeamento de cada cenário
- * (2xx, 400, 500, timeout, 429 com Retry-After) para {@link ProviderOutcome}.
- */
 class ActivationProviderClientTest {
 
     private WireMockServer wireMock;
@@ -92,7 +88,7 @@ class ActivationProviderClientTest {
     @Test
     void timeoutRetornaFalhaTransiente() {
         wireMock.stubFor(post(urlEqualTo("/provider/v1/activate"))
-                .willReturn(aResponse().withStatus(200).withFixedDelay(2000))); // > read-timeout 800ms
+                .willReturn(aResponse().withStatus(200).withFixedDelay(2000))); 
 
         var outcome = client.activate(command());
 

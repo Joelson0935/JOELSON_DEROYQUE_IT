@@ -26,15 +26,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.UUID;
 
-/**
- * Endpoints REST de solicitações de ativação.
- *
- * <p>Autorização por escopo (OAuth2):
- * <ul>
- *   <li>criação exige escopo {@code activation.write};</li>
- *   <li>consulta/listagem exigem escopo {@code activation.read}.</li>
- * </ul>
- */
 @RestController
 @RequestMapping("/api/v1/requests")
 @Tag(name = "Solicitações de ativação", description = "Criação e consulta de solicitações de ativação")
@@ -68,7 +59,7 @@ public class ActivationController {
                     .toUri();
             return ResponseEntity.created(location).body(body);
         }
-        // Retry idempotente: registro já existia com o mesmo conteúdo.
+        
         return ResponseEntity.ok(body);
     }
 

@@ -28,9 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Testes da camada web (controller + validação + segurança), com o service mockado.
- */
 @WebMvcTest(ActivationController.class)
 @Import({SecurityConfig.class, ProblemDetailSecurityHandlers.class, ConsumerContext.class})
 class ActivationControllerTest {
@@ -41,7 +38,6 @@ class ActivationControllerTest {
     @MockBean
     private ActivationService service;
 
-    // O resource server exige um JwtDecoder; mockamos pois usamos postProcessor jwt().
     @MockBean
     private JwtDecoder jwtDecoder;
 
@@ -122,7 +118,7 @@ class ActivationControllerTest {
 
     @Test
     void escopoInsuficienteRetorna403() throws Exception {
-        // Token só com read tentando criar (exige write).
+        
         mockMvc.perform(post("/api/v1/requests")
                         .with(jwt().authorities(new org.springframework.security.core.authority.SimpleGrantedAuthority("SCOPE_activation.read")))
                         .contentType(MediaType.APPLICATION_JSON)

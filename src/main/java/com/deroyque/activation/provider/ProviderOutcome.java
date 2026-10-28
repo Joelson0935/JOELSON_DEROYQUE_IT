@@ -1,17 +1,5 @@
 package com.deroyque.activation.provider;
 
-/**
- * Resultado de uma chamada ao provedor externo, classificado segundo a decisão de negócio.
- *
- * <p>Mapeamento de cenários (ver README, item 5):
- * <ul>
- *   <li>{@code SUCCESS} (2xx): ativação concluída → COMPLETED, sem nova tentativa.</li>
- *   <li>{@code PERMANENT_FAILURE} (ex.: HTTP 400): erro do nosso lado/dados inválidos →
- *       FAILED, sem nova tentativa (retry não resolveria).</li>
- *   <li>{@code TRANSIENT_FAILURE} (HTTP 5xx, timeout, 429/503): condição temporária →
- *       permanece elegível a retry com backoff até o limite de tentativas.</li>
- * </ul>
- */
 public record ProviderOutcome(Type type, String detail, Integer retryAfterSeconds) {
 
     public enum Type {

@@ -6,12 +6,6 @@ import com.deroyque.activation.domain.RequestStatus;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Representação de saída de uma solicitação de ativação.
- *
- * <p>As datas são serializadas como {@link Instant} (UTC, ISO-8601) — ex.:
- * {@code 2026-10-26T14:03:11Z}.
- */
 public record ActivationResponse(
         UUID id,
         String externalId,

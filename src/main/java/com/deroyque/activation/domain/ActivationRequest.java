@@ -14,21 +14,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 
-/**
- * Solicitação de ativação de um produto para um cliente.
- *
- * <p>Regras de negócio relevantes modeladas aqui (e não em serviços externos):
- * <ul>
- *   <li>Transições de status passam por {@link #transitionTo(RequestStatus)}, que valida
- *       a máquina de estados. Não há setter público de status.</li>
- *   <li>{@code externalId} é único (constraint no banco) — base da estratégia anti-duplicidade.</li>
- *   <li>{@code @Version} fornece lock otimista, protegendo contra escrita concorrente de status.</li>
- *   <li>{@code attempts} conta as tentativas de envio ao provedor.</li>
- * </ul>
- *
- * <p>{@code consumerId} registra qual consumidor (client do OAuth2) criou o registro,
- * suportando isolamento entre consumidores (ver {@code OWASP API Top 10 - BOLA}).
- */
 @Entity
 @Table(
         name = "activation_request",
@@ -59,11 +44,9 @@ public class ActivationRequest {
     @Column(name = "failure_reason", length = 500)
     private String failureReason;
 
-    /** Momento a partir do qual a solicitação está elegível para (re)processamento (backoff). */
     @Column(name = "next_attempt_at", nullable = false)
     private Instant nextAttemptAt;
 
-    /** Identificador do consumidor (sub/azp do token) que criou a solicitação. */
     @Column(name = "consumer_id", length = 150)
     private String consumerId;
 
@@ -77,7 +60,6 @@ public class ActivationRequest {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    /** Construtor exigido pelo JPA. */
     protected ActivationRequest() {
     }
 
@@ -92,18 +74,10 @@ public class ActivationRequest {
         this.nextAttemptAt = Instant.now();
     }
 
-    /**
-     * Cria uma nova solicitação no estado {@link RequestStatus#PENDING}.
-     */
     public static ActivationRequest create(String externalId, String customerId, String productCode, String consumerId) {
         return new ActivationRequest(externalId, customerId, productCode, consumerId);
     }
 
-    /**
-     * Executa uma transição de estado validando a máquina de estados.
-     *
-     * @throws InvalidStateTransitionException se a transição não for permitida
-     */
     public void transitionTo(RequestStatus target) {
         if (!this.status.canTransitionTo(target)) {
             throw new InvalidStateTransitionException(this.status, target);
@@ -111,32 +85,27 @@ public class ActivationRequest {
         this.status = target;
     }
 
-    /** Marca o início do processamento (PENDING -> PROCESSING) e incrementa o contador de tentativas. */
     public void markProcessing() {
         transitionTo(RequestStatus.PROCESSING);
         this.attempts++;
     }
 
-    /** Conclui com sucesso (PROCESSING -> COMPLETED). */
     public void markCompleted() {
         transitionTo(RequestStatus.COMPLETED);
         this.failureReason = null;
     }
 
-    /** Falha definitiva (PROCESSING -> FAILED). */
     public void markFailed(String reason) {
         transitionTo(RequestStatus.FAILED);
         this.failureReason = truncate(reason);
     }
 
-    /** Falha temporária: volta para PENDING agendando a próxima tentativa (backoff). */
     public void markForRetry(String reason, Instant nextAttemptAt) {
         transitionTo(RequestStatus.PENDING);
         this.failureReason = truncate(reason);
         this.nextAttemptAt = nextAttemptAt;
     }
 
-    /** Reagenda o processamento (usado pela reconciliação de registros presos). */
     public void rescheduleTo(Instant nextAttemptAt) {
         this.nextAttemptAt = nextAttemptAt;
     }

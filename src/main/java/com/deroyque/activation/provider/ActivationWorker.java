@@ -7,14 +7,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-/**
- * Worker que consome o "outbox": periodicamente seleciona solicitações PENDING elegíveis
- * (respeitando o backoff via {@code next_attempt_at}) e as processa.
- *
- * <p>O lote é reservado atomicamente com {@code FOR UPDATE SKIP LOCKED}, o que permite rodar
- * várias instâncias da aplicação em paralelo sem processar o mesmo registro duas vezes.
- * As chamadas ao provedor acontecem fora de qualquer transação de banco.
- */
 @Component
 public class ActivationWorker {
 
@@ -38,19 +30,18 @@ public class ActivationWorker {
             return;
         }
         try {
-            // 1) Reserva e marca o lote como PROCESSING (transação curta).
+            
             List<ActivateCommand> batch = stateUpdater.claimBatch(properties.worker().batchSize());
             if (batch.isEmpty()) {
                 return;
             }
             log.debug("Worker processando lote de {} solicitação(ões)", batch.size());
-            // 2) Para cada item: chamada remota + aplicação do desfecho (fora de transação longa).
+            
             for (ActivateCommand command : batch) {
                 try {
                     processor.dispatch(command);
                 } catch (Exception e) {
-                    // Um item com erro não deve interromper o lote; permanecerá em PROCESSING
-                    // e será resgatado pela reconciliação.
+                    
                     log.error("Erro ao processar solicitação id={}: {}",
                             command.idempotencyKey(), e.getMessage(), e);
                 }

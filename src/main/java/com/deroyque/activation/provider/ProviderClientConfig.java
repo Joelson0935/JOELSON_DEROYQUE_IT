@@ -8,10 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
-/**
- * Configura o {@link RestClient} usado para falar com o provedor externo, com timeouts
- * explícitos de conexão e de leitura (evita threads presas se o provedor travar).
- */
 @Configuration
 @EnableConfigurationProperties({ProviderProperties.class, ActivationWorkerProperties.class})
 public class ProviderClientConfig {

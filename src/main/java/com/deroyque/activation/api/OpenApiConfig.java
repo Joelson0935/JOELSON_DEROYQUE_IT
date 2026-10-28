@@ -8,13 +8,6 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Configuração do OpenAPI/Swagger.
- *
- * <p>Declara um esquema de segurança HTTP Bearer (JWT) para que o Swagger UI exiba o botão
- * "Authorize": basta colar o access token (obtido em {@code GET /dev/token} no profile local)
- * para que ele seja enviado no header {@code Authorization: Bearer ...} nas chamadas.
- */
 @Configuration
 public class OpenApiConfig {
 

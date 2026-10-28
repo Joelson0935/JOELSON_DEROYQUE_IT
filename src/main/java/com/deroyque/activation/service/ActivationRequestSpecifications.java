@@ -4,9 +4,6 @@ import com.deroyque.activation.domain.ActivationRequest;
 import com.deroyque.activation.domain.RequestStatus;
 import org.springframework.data.jpa.domain.Specification;
 
-/**
- * Specifications para a listagem paginada com filtros opcionais.
- */
 public final class ActivationRequestSpecifications {
 
     private ActivationRequestSpecifications() {
@@ -23,7 +20,7 @@ public final class ActivationRequestSpecifications {
             if (customerId != null && !customerId.isBlank()) {
                 predicates.add(cb.equal(root.get("customerId"), customerId));
             }
-            // Isolamento por consumidor (BOLA): um consumidor só enxerga o que ele criou.
+            
             if (consumerId != null && !consumerId.isBlank()) {
                 predicates.add(cb.equal(root.get("consumerId"), consumerId));
             }

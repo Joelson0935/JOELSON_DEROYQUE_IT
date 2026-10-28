@@ -10,10 +10,6 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * Testes de persistência focados na constraint de unicidade de externalId (anti-duplicidade)
- * e nas consultas do repositório. Usa H2 em modo PostgreSQL com o schema do Flyway.
- */
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")

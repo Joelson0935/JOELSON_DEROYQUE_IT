@@ -4,10 +4,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
 
-/**
- * Configuração do processamento assíncrono (outbox worker) e da reconciliação
- * (prefixo {@code activation} no application.yml).
- */
 @ConfigurationProperties(prefix = "activation")
 public record ActivationWorkerProperties(
         Worker worker,

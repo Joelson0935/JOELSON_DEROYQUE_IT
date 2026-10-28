@@ -24,11 +24,6 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-/**
- * Teste de integração do fluxo assíncrono fim-a-fim: a API cria a solicitação (PENDING), o worker
- * a processa chamando o provedor (WireMock) e o status final é atingido. Usa Awaitility para
- * aguardar o processamento em background.
- */
 class ActivationFlowIT extends AbstractPostgresIT {
 
     private static WireMockServer wireMock;
@@ -55,7 +50,7 @@ class ActivationFlowIT extends AbstractPostgresIT {
     @DynamicPropertySource
     static void providerProps(DynamicPropertyRegistry registry) {
         registry.add("provider.base-url", () -> "http://localhost:8089");
-        // Liga o worker com poll rápido para o teste observar o processamento.
+        
         registry.add("activation.worker.enabled", () -> "true");
         registry.add("activation.worker.poll-interval", () -> "300");
         registry.add("activation.worker.max-attempts", () -> "3");
@@ -105,7 +100,6 @@ class ActivationFlowIT extends AbstractPostgresIT {
                 new CreateActivationRequest("EXT-RETRY-" + UUID.randomUUID(), "CUST-1", "P1"),
                 "cliente-a").request().getId();
 
-        // max-attempts=3, backoff base 1s → alcança FAILED em poucos segundos.
         await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
             ActivationRequest r = repository.findById(id).orElseThrow();
             assertThat(r.getStatus()).isEqualTo(RequestStatus.FAILED);

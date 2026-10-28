@@ -5,10 +5,6 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 import java.util.function.Function;
 
-/**
- * Envelope de paginação estável para a API, independente da classe {@code Page} do Spring
- * (cuja serialização padrão é considerada instável entre versões).
- */
 public record PageResponse<T>(
         List<T> content,
         int page,
