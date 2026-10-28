@@ -1,0 +1,43 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+# Segredo HMAC para emitir/validar tokens nos testes de segurança.
+security:
+  dev:
+    jwt:
+      hmac-secret: test-only-secret-change-me-please-32bytes!!
+
+provider:
+  base-url: http://localhost:9999
+  activate-path: /provider/v1/activate
+  connect-timeout: 500ms
+  read-timeout: 800ms
+  api-key: test-key
+
+activation:
+  worker:
+    enabled: false         # desligado por padrão nos testes; cada teste controla o processamento
+    batch-size: 20
+    poll-interval: 100000
+    max-attempts: 3
+    base-backoff-seconds: 1
+    max-backoff-seconds: 10
+  reconciliation:
+    stuck-after: 1s
+    interval: 100000
+  request:
+    max-field-length: 100

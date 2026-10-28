@@ -1,0 +1,10 @@
+# Profile de produção.
+# Valida tokens emitidos pelo Authorization Server real (RS256 via JWKS).
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OAUTH2_ISSUER_URI}
+          # Alternativamente, aponte diretamente para o JWKS:
+          # jwk-set-uri: ${OAUTH2_JWK_SET_URI}

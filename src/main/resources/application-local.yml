@@ -1,0 +1,26 @@
+# Profile de desenvolvimento local.
+# Usa H2 em memória e um JWT HMAC (segredo simétrico) para permitir testar a API sem
+# um Authorization Server real. NÃO use este profile em produção.
+spring:
+  datasource:
+    url: jdbc:h2:mem:activation;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  h2:
+    console:
+      enabled: true
+
+# Segredo HMAC para assinar/validar tokens de desenvolvimento (>= 32 bytes).
+security:
+  dev:
+    jwt:
+      hmac-secret: ${DEV_JWT_SECRET:dev-only-secret-change-me-please-32bytes!!}
+
+provider:
+  base-url: http://localhost:8081
