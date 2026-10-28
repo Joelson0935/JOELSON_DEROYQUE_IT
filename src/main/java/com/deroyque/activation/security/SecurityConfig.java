@@ -49,8 +49,14 @@ public class SecurityConfig {
                                 "/actuator/health/**", "/actuator/info", "/actuator/prometheus").permitAll()
                         // Emissor de token de desenvolvimento (controller só existe no profile 'local').
                         .requestMatchers("/dev/token").permitAll()
+                        // Documentação OpenAPI / Swagger UI.
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Console H2 (habilitado apenas no profile 'local').
+                        .requestMatchers("/h2-console/**").permitAll()
                         // Demais chamadas exigem autenticação; a autorização fina é por @PreAuthorize.
                         .anyRequest().authenticated())
+                // O console H2 renderiza em frames; libera frames da mesma origem.
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .oauth2ResourceServer(oauth -> oauth
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(securityHandlers)

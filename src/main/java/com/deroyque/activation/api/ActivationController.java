@@ -7,6 +7,8 @@ import com.deroyque.activation.domain.RequestStatus;
 import com.deroyque.activation.security.ConsumerContext;
 import com.deroyque.activation.service.ActivationService;
 import com.deroyque.activation.service.CreateActivationResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -35,6 +37,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/v1/requests")
+@Tag(name = "Solicitações de ativação", description = "Criação e consulta de solicitações de ativação")
 public class ActivationController {
 
     private static final int MAX_PAGE_SIZE = 100;
@@ -49,6 +52,9 @@ public class ActivationController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('SCOPE_activation.write')")
+    @Operation(summary = "Cria uma solicitação de ativação",
+            description = "Retorna 201 ao criar; 200 em retry idempotente (mesmo externalId e conteúdo); "
+                    + "409 se o externalId existir com conteúdo divergente. Exige escopo activation.write.")
     public ResponseEntity<ActivationResponse> create(
             @Valid @RequestBody CreateActivationRequest request,
             UriComponentsBuilder uriBuilder) {
@@ -68,6 +74,8 @@ public class ActivationController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_activation.read')")
+    @Operation(summary = "Consulta uma solicitação pelo id",
+            description = "Retorna 404 se não existir ou pertencer a outro consumidor. Exige escopo activation.read.")
     public ActivationResponse getById(@PathVariable UUID id) {
         var request = service.getByIdForConsumer(id, consumerContext.currentConsumerId());
         return ActivationResponse.from(request);
@@ -75,6 +83,9 @@ public class ActivationController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_activation.read')")
+    @Operation(summary = "Lista solicitações (paginado, com filtros)",
+            description = "Filtros opcionais por status e customerId. Sempre restrito ao consumidor autenticado. "
+                    + "Exige escopo activation.read.")
     public PageResponse<ActivationResponse> list(
             @RequestParam(required = false) RequestStatus status,
             @RequestParam(required = false) String customerId,

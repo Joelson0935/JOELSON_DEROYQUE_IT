@@ -71,6 +71,15 @@ Pré-requisito: JDK 21. Não precisa de banco nem do provedor externo.
 O emissor de token de desenvolvimento (`/dev/token`) fica disponível, assim como o console H2 em
 `/h2-console`.
 
+### Testar pelo Swagger UI
+
+Com a aplicação no ar, abra **http://localhost:8080/swagger-ui.html** (especificação em
+`/v3/api-docs`). Para chamar os endpoints protegidos:
+
+1. Obtenha um token em `GET /dev/token` (profile `local`) — copie o `access_token`.
+2. Clique em **Authorize** (cadeado), cole o token e confirme.
+3. Agora as chamadas enviam `Authorization: Bearer <token>` automaticamente.
+
 ### Rodar os testes
 
 ```bash

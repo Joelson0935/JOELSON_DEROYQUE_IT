@@ -62,6 +62,13 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
+        <!-- Documentação OpenAPI / Swagger UI -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+
         <!-- Migrações de schema -->
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -81,7 +88,8 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <!-- runtime (e não test) para o profile 'local' poder usar H2 ao rodar a aplicação -->
+            <scope>runtime</scope>
         </dependency>
 
         <!-- ================= TESTES ================= -->
