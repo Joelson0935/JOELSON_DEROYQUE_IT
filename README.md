@@ -61,11 +61,18 @@ Após alguns segundos o worker processa a solicitação e o status passa de `PEN
 
 ### Opção B — Rodar localmente (perfil `local`, banco H2 em memória)
 
-Pré-requisito: JDK 21. Não precisa de banco nem do provedor externo.
+Pré-requisito: JDK 21 e Maven. Não precisa de banco nem do provedor externo.
+
+No **Windows PowerShell** (as aspas são obrigatórias para o PowerShell não quebrar o argumento no ponto):
+
+```powershell
+mvn spring-boot:run "-Dspring-boot.run.profiles=local"
+```
+
+No **Linux/macOS** (bash):
 
 ```bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local
-# Windows: .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 O emissor de token de desenvolvimento (`/dev/token`) fica disponível, assim como o console H2 em
@@ -83,15 +90,16 @@ Com a aplicação no ar, abra **http://localhost:8080/swagger-ui.html** (especif
 ### Rodar os testes
 
 ```bash
-./mvnw verify
+mvn verify
 ```
 
 - **Testes unitários e de web** rodam sem Docker.
 - **Testes de integração** (`*IT`) usam **Testcontainers (PostgreSQL)** e **WireMock** e, portanto,
   exigem Docker em execução. Sem Docker, rode apenas os leves:
   ```bash
-  ./mvnw test -Dtest='*Test'
+  mvn test -Dtest='*Test'
   ```
+  No **Windows PowerShell**, coloque o parâmetro entre aspas: `mvn test "-Dtest=*Test"`.
 
 ---
 
