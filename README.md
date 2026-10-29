@@ -12,6 +12,8 @@ Spring Security (OAuth2 Resource Server) · Maven**.
 ## Sumário
 
 - [Como executar](#como-executar)
+- [Testando a API](#testando-a-api)
+- [Rodar os testes automatizados](#rodar-os-testes-automatizados)
 - [Arquitetura e fluxo](#arquitetura-e-fluxo)
 - [API](#api)
 - [Decisões técnicas](#decisões-técnicas)
@@ -41,23 +43,10 @@ docker compose up --build
 Sobe três contêineres: PostgreSQL, um mock do provedor (WireMock, responde `200` em
 `POST /provider/v1/activate`) e a aplicação em `http://localhost:8080`.
 
-Para testar a API ponta a ponta:
+Com o Compose, o mock do provedor existe, então o worker processa a solicitação e o status passa
+de `PENDING` a `COMPLETED` após alguns segundos.
 
-```bash
-# 1) Obter um token de desenvolvimento (HMAC) com os dois escopos
-TOKEN=$(curl -s "http://localhost:8080/dev/token?scope=activation.read%20activation.write" | sed -E 's/.*"access_token":"([^"]+)".*/\1/')
-
-# 2) Criar uma solicitação
-curl -i -X POST http://localhost:8080/api/v1/requests \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"externalId":"EXT-12345","customerId":"CUST-10001","productCode":"INTERNET-500"}'
-
-# 3) Consultar pelo id devolvido no passo anterior
-curl -s http://localhost:8080/api/v1/requests/<ID> -H "Authorization: Bearer $TOKEN"
-```
-
-Após alguns segundos o worker processa a solicitação e o status passa de `PENDING` a `COMPLETED`.
+Para testar a API, veja a seção [Testando a API](#testando-a-api).
 
 ### Opção B — Rodar localmente (perfil `local`, banco H2 em memória)
 
@@ -78,16 +67,61 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 O emissor de token de desenvolvimento (`/dev/token`) fica disponível, assim como o console H2 em
 `/h2-console`.
 
-### Testar pelo Swagger UI
+## Testando a API
 
-Com a aplicação no ar, abra **http://localhost:8080/swagger-ui.html** (especificação em
-`/v3/api-docs`). Para chamar os endpoints protegidos:
+Os endpoints de negócio (`/api/v1/requests`) exigem um token JWT no header
+`Authorization: Bearer <token>`. O navegador **não** envia esse header pela barra de endereço —
+por isso acessar a URL direto no navegador retorna `401`. Use uma das duas opções abaixo.
 
-1. Obtenha um token em `GET /dev/token` (profile `local`) — copie o `access_token`.
-2. Clique em **Authorize** (cadeado), cole o token e confirme.
-3. Agora as chamadas enviam `Authorization: Bearer <token>` automaticamente.
+> O token é obtido em `GET /dev/token`, que é aberto (não exige autenticação). Esse endpoint só
+> existe nos perfis de desenvolvimento (`local`/Compose); em produção os tokens vêm do
+> Authorization Server real.
 
-### Rodar os testes
+### Opção 1 — Swagger UI (recomendado, sem instalar nada)
+
+Passo a passo:
+
+1. Abra no navegador: **http://localhost:8080/swagger-ui.html**
+2. Expanda **`GET /dev/token`** → clique em **Try it out** → **Execute**.
+3. Na resposta, copie o valor do campo **`access_token`** (o texto longo entre aspas).
+4. No topo da página, clique no botão **Authorize** (cadeado).
+5. Cole **apenas o token** (sem a palavra `Bearer`) no campo e clique em **Authorize** → **Close**.
+6. Agora teste os endpoints protegidos (o Swagger envia o header automaticamente):
+   - **`POST /api/v1/requests`** → **Try it out** → ajuste o JSON do corpo → **Execute**.
+     Na resposta, copie o campo **`id`** (um UUID).
+   - **`GET /api/v1/requests/{id}`** → **Try it out** → cole o **`id`** (UUID) copiado → **Execute**.
+
+> Atenção: o `GET /api/v1/requests/{id}` espera o **`id`** (o UUID gerado pelo serviço, devolvido
+> no POST), e não o `externalId` nem o `customerId`.
+
+### Opção 2 — Windows PowerShell
+
+Abra **uma nova janela** do PowerShell (não use a janela em que a aplicação está rodando) e
+execute os comandos abaixo, um bloco por vez.
+
+Obter o token e guardá-lo em uma variável:
+
+```powershell
+$TOKEN = (Invoke-RestMethod "http://localhost:8080/dev/token?scope=activation.read activation.write").access_token
+```
+
+Criar uma solicitação (a resposta é guardada em `$r`):
+
+```powershell
+$r = Invoke-RestMethod -Uri "http://localhost:8080/api/v1/requests" -Method Post -Headers @{ Authorization = "Bearer $TOKEN" } -ContentType "application/json" -Body '{"externalId":"EXT-12345","customerId":"CUST-10001","productCode":"INTERNET-500"}'
+$r
+```
+
+Consultar pelo id devolvido no passo anterior (usa `$r.id` automaticamente):
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/api/v1/requests/$($r.id)" -Headers @{ Authorization = "Bearer $TOKEN" }
+```
+
+> Não cole esses comandos no navegador — eles são para o terminal do PowerShell. E não use a
+> sintaxe `curl -H "..."` no PowerShell; prefira `Invoke-RestMethod` como acima.
+
+## Rodar os testes automatizados
 
 ```bash
 mvn verify
